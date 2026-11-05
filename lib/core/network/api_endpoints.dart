@@ -4,7 +4,7 @@ abstract final class ApiEndpoints {
   // On real device: http://<LAN_IP>:5000 or production Render URL
   static const String baseUrl = String.fromEnvironment(
     'API_BASE_URL',
-    defaultValue: 'http://10.0.2.2:5000',
+    defaultValue: 'https://ghostconv-backend.onrender.com',
   );
 
   static const String health = '/health';
