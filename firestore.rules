@@ -1,0 +1,57 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isRoomParticipant(roomId) {
+      return isAuthenticated() &&
+        request.auth.uid in get(/databases/$(database)/documents/rooms/$(roomId)).data.participants;
+    }
+
+    function isRoomActive(roomId) {
+      return get(/databases/$(database)/documents/rooms/$(roomId)).data.status == 'active';
+    }
+
+    // Users Collection
+    // Each user can read and update only their own profile
+    match /users/{userId} {
+      allow read: if isAuthenticated();
+      allow write: if isAuthenticated() && request.auth.uid == userId;
+    }
+
+    // Rooms Collection
+    // Room documents are written ONLY by backend Firebase Admin SDK
+    match /rooms/{roomId} {
+      // Only paired participants can read the room metadata
+      allow read: if isAuthenticated() &&
+        request.auth.uid in resource.data.participants;
+      
+      // Clients cannot create, update, or delete rooms directly
+      allow create, update, delete: if false;
+
+      // Messages Subcollection
+      match /messages/{messageId} {
+        // Only participants can read messages
+        allow read: if isRoomParticipant(roomId);
+
+        // Participants can create messages ONLY while the room is active and as themselves
+        allow create: if isRoomParticipant(roomId) &&
+          isRoomActive(roomId) &&
+          request.resource.data.senderId == request.auth.uid;
+
+        // Participants can only update delivery status (seen/delivered), not message text or sender
+        allow update: if isRoomParticipant(roomId) &&
+          request.resource.data.text == resource.data.text &&
+          request.resource.data.senderId == resource.data.senderId;
+
+        // Clients cannot directly delete messages; deletion is executed by server wipe
+        allow delete: if false;
+      }
+    }
+  }
+}
+
