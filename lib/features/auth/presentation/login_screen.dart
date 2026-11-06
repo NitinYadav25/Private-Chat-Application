@@ -85,11 +85,12 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       shape: BoxShape.circle,
                       boxShadow: colors.isDark ? AppColors.darkGlowShadow : null,
                     ),
-                    child: const Center(
-                      child: Icon(
-                        LucideIcons.ghost,
-                        size: 36,
-                        color: Colors.white,
+                    child: Center(
+                      child: Image.asset(
+                        'assets/images/logo.png',
+                        width: 44,
+                        height: 44,
+                        fit: BoxFit.contain,
                       ),
                     ),
                   ),

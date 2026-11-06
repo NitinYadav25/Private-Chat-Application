@@ -65,11 +65,12 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
                   ),
                 ],
               ),
-              child: const Center(
-                child: Icon(
-                  LucideIcons.ghost,
-                  size: 48,
-                  color: Colors.white,
+              child: Center(
+                child: Image.asset(
+                  'assets/images/logo.png',
+                  width: 58,
+                  height: 58,
+                  fit: BoxFit.contain,
                 ),
               ),
             )
