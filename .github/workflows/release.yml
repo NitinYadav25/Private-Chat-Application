@@ -36,6 +36,14 @@ jobs:
       - name: Run Automated Flutter Tests
         run: flutter test
 
+      - name: Configure Keystore for CI
+        run: |
+          keytool -genkeypair -v -keystore android/app/release.jks -keyalg RSA -keysize 2048 -validity 10000 -alias ghostconv -storepass ghostconv123 -keypass ghostconv123 -dname "CN=GhostConv, OU=Mobile, O=GhostConv, L=Delhi, ST=Delhi, C=IN"
+          echo "storePassword=ghostconv123" > android/key.properties
+          echo "keyPassword=ghostconv123" >> android/key.properties
+          echo "keyAlias=ghostconv" >> android/key.properties
+          echo "storeFile=release.jks" >> android/key.properties
+
       - name: Build Split-per-ABI Release APKs
         run: flutter build apk --release --split-per-abi
 
