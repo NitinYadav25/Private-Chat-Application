@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../data/auth_repository.dart';
@@ -51,6 +52,7 @@ class AuthController extends StateNotifier<AuthState> {
   }
 
   final AuthRepository _repository;
+  StreamSubscription<UserModel?>? _authSubscription;
 
   Future<void> initialize() async {
     state = state.copyWith(isLoading: true, clearError: true);
@@ -60,10 +62,27 @@ class AuthController extends StateNotifier<AuthState> {
 
     state = state.copyWith(
       user: currentUser,
-      hasCompletedOnboarding: hasOnboarded,
+      hasCompletedOnboarding: hasOnboarded || (currentUser != null),
       isLoading: false,
       isInitialized: true,
     );
+
+    _authSubscription?.cancel();
+    _authSubscription = _repository.authStateChanges.listen((user) {
+      if (user != null) {
+        state = state.copyWith(
+          user: user,
+          hasCompletedOnboarding: true,
+          isInitialized: true,
+        );
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _authSubscription?.cancel();
+    super.dispose();
   }
 
   Future<void> completeOnboarding() async {

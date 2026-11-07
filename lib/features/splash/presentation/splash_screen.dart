@@ -24,7 +24,20 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
   }
 
   Future<void> _checkNavigation() async {
-    await Future.delayed(const Duration(milliseconds: 1600));
+    final startTime = DateTime.now();
+
+    // 1. Wait until AuthController has fully completed its async initialize()
+    while (!ref.read(authControllerProvider).isInitialized && mounted) {
+      await Future.delayed(const Duration(milliseconds: 50));
+    }
+
+    // 2. Ensure splash glowing logo is visible for at least 1400ms for smooth experience
+    final elapsed = DateTime.now().difference(startTime);
+    final remaining = const Duration(milliseconds: 1400) - elapsed;
+    if (remaining > Duration.zero) {
+      await Future.delayed(remaining);
+    }
+
     if (!mounted) return;
 
     final authState = ref.read(authControllerProvider);
